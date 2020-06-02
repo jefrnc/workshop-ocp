@@ -1,0 +1,69 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: mvn-build-jar
+spec:
+  workspaces:
+  - name: maven-repo
+  inputs:
+    resources:
+    - name: source
+      type: git
+  steps:
+    - name: mvn
+      image: 'maven:3.6.3-openjdk-15'
+      workingDir: /workspace/source
+      command: ["/usr/bin/mvn"]
+      args:
+        - clean
+        - package
+        - -DskipTests
+        - -Dmaven.repo.local=$(workspaces.maven-repo.path)
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: mvn-build-native
+spec:
+  workspaces:
+  - name: maven-repo
+  inputs:
+    resources:
+    - name: source
+      type: git
+  steps:
+    - name: mvn
+      image: 'maven:3.6.3-openjdk-15'
+      workingDir: /workspace/source
+      command: ["/usr/bin/mvn clean package -DskipTests -Pnative -Dmaven.repo.local=$(workspaces.maven-repo.path)"]
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: dummy-task
+spec:
+  steps:
+    - name: mvn
+      image: 'maven:3.6.3-openjdk-15'
+      workingDir: /workspace/source
+      command: ["/usr/bin/mvn --version"]
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: clone-app-repo-to-workspace
+spec:
+  workspaces:
+    - name: maven-repo
+  resources:
+    inputs:
+      - name: source
+        type: git
+        targetPath: application
+  steps:
+    - name: clone-app-repo-to-workspace
+      image: ubuntu
+      script: |
+        #!/usr/bin/env bash
+        set -xe
+        cp -avr $(resources.inputs.source.path)/ $(workspaces.maven-repo.path)/

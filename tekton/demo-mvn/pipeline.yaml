@@ -1,0 +1,85 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: quarkus-build
+spec:
+  workspaces:
+  - name: local-maven-repo
+  resources:
+  - name: app-git
+    type: git
+  tasks:
+#bajamos los fuentes y lo ponemos en el workspace para compartirlo con los otras task
+  - name: get-source
+    taskRef:
+      name: clone-app-repo-to-workspace
+    resources:
+      inputs:
+      - name: source
+        resource: app-git
+    workspaces:
+    - name: maven-repo
+      workspace: local-maven-repo
+
+
+       
+  - name: test-coverage
+    taskRef:
+      name: dummy-task
+    runAfter: ["get-source"]
+
+
+  - name: build
+    taskRef:
+      name: mvn-build-jar
+    runAfter: ["get-source"]
+    resources:
+      inputs:
+      - name: source
+        resource: app-git
+    workspaces:
+    - name: maven-repo
+      workspace: local-maven-repo
+
+  - name: build-native
+    taskRef:
+      name: mvn-build-native
+    runAfter: ["get-source"]
+    resources:
+      inputs:
+      - name: source
+        resource: app-git
+    workspaces:
+    - name: maven-repo
+      workspace: local-maven-repo
+
+  - name: test
+    taskRef:
+      name: mvn
+    runAfter: ["build"]
+    resources:
+      inputs:
+      - name: source
+        resource: app-git
+    params:
+    - name: GOALS
+      value: ["verify"]
+    workspaces:
+    - name: maven-repo
+      workspace: local-maven-repo
+      
+ 
+#   - name: gen-report
+#     taskRef:
+#       name: mvn
+#     runAfter: ["build"]
+#     resources:
+#       inputs:
+#       - name: source
+#         resource: app-git
+#     params:
+#     - name: GOALS
+#       value: ["site"] 
+#     workspaces:
+#     - name: maven-repo
+#       workspace: local-maven-repo

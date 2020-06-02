@@ -1,0 +1,20 @@
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
+metadata:
+  name: pipeline-run
+spec:
+  pipelineRef:
+    name: quarkus-build
+  resources:
+  - name: app-git
+    resourceSpec:
+      type: git
+      params:
+        - name: url
+          value: https://github.com/jefrnc/workshop-ocp.git
+  workspaces:
+  - name: local-maven-repo
+    persistentVolumeClaim:
+      claimName: local-maven-repo-pvc
+      

@@ -1,0 +1,154 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-maven-repo
+spec:
+  resources:
+    requests:
+      storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain 
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: mvn-build-jar
+spec:
+  workspaces:
+  - name: maven-repo
+  inputs:
+    resources:
+    - name: source
+      type: git
+  steps:
+    - name: mvn
+      image: 'maven:3.6.3-openjdk-15'
+      workingDir: /workspace/source
+      command: ["/usr/bin/mvn"]
+      args:
+        - clean
+        - package
+        - -DskipTests
+        - -Dmaven.repo.local=$(workspaces.maven-repo.path)
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: mvn-build-native
+spec:
+  workspaces:
+  - name: maven-repo
+  inputs:
+    resources:
+    - name: source
+      type: git
+  steps:
+    - name: mvn
+      image: 'maven:3.6.3-openjdk-15'
+      workingDir: /workspace/source
+      command: ["/usr/bin/mvn"]
+      args:
+        - clean
+        - package
+        - -DskipTests
+        - -Pnative
+        - -Dmaven.repo.local=$(workspaces.maven-repo.path)        
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: clone-app-repo-to-workspace
+spec:
+  workspaces:
+    - name: local-maven-repo
+  resources:
+    inputs:
+      - name: source
+        type: git
+        targetPath: application
+  steps:
+    - name: clone-app-repo-to-workspace
+      image: ubuntu
+      script: |
+        #!/usr/bin/env bash
+        set -xe
+        cp -avr $(resources.inputs.app-git.path)/ $(workspaces.local-maven-repo.path)/
+---
+# Task to install NPM packages
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: pull-dependencies
+spec:
+  inputs:
+    resources:
+    - name: source
+      type: git
+  outputs:
+    resources:
+    - name: source
+      type: git
+  steps:
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: maven-build
+spec:
+  workspaces:
+  - name: local-maven-repo
+  resources:
+  - name: app-git
+    type: git
+  tasks:
+  - name: build
+    taskRef:
+      name: mvn-build-jar
+    resources:
+      inputs:
+      - name: source
+        resource: app-git
+    workspaces:
+    - name: maven-repo
+      workspace: local-maven-repo
+  - name: build-native
+    taskRef:
+      name: mvn-build-native
+    resources:
+      inputs:
+      - name: source
+        resource: app-git
+    workspaces:
+    - name: maven-repo
+      workspace: local-maven-repo
+  - name: test
+    taskRef:
+      name: mvn
+    runAfter: ["build"]
+    resources:
+      inputs:
+      - name: source
+        resource: app-git
+    params:
+    - name: GOALS
+      value: ["verify"]
+    workspaces:
+    - name: maven-repo
+      workspace: local-maven-repo
+#   - name: gen-report
+#     taskRef:
+#       name: mvn
+#     runAfter: ["build"]
+#     resources:
+#       inputs:
+#       - name: source
+#         resource: app-git
+#     params:
+#     - name: GOALS
+#       value: ["site"] 
+#     workspaces:
+#     - name: maven-repo
+#       workspace: local-maven-repo

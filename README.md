@@ -159,7 +159,7 @@ Successfully tagged quarkus-started:latest
 ```
 
 
-
+Creamos un proyecto desde el cliente
 ```
 $ oc new-project quarkus-started
 Now using project "quarkus-started" on server "https://api.cluster-666-3005.666-3005.example.opentlc.com:6443".
@@ -171,7 +171,7 @@ You can add applications to this project with the 'new-app' command. For example
 to build a new example application in Ruby.
 ```
 
-
+Creamos un nuevo Build
 ```
 $ oc new-build --binary --name=quarkus-started -l app=quarkus-started
     * A Docker build using binary input will be created
@@ -184,12 +184,13 @@ $ oc new-build --binary --name=quarkus-started -l app=quarkus-started
 --> Success
 ```
 
+Definimos la estrategia y el docker file que vamos a usar
 ```
 $ oc patch bc/quarkus-started -p '{"spec":{"strategy":{"dockerStrategy":{"dockerfilePath":"src/main/docker/Dockerfile.native"}}}}'
 buildconfig.build.openshift.io/quarkus-started patched
 ```
 
-
+Procedemos a iniciar el Buid
 ```
 $ oc start-build quarkus-started --from-dir=. --follow
 Uploading directory "." as binary input for the build ...
@@ -239,6 +240,7 @@ Successfully pushed image-registry.openshift-image-registry.svc:5000/quarkus-sta
 Push successful
 ```
 
+Una vez que la imagen se encuentra en el repositorio local, procedemos a crear una nueva app.
 
 ```
 $ oc new-app --image-stream=quarkus-started:latest
@@ -263,23 +265,33 @@ $ oc new-app --image-stream=quarkus-started:latest
     Run 'oc status' to view your app.
 ```
 
+Exponemos el servicio
 ```
 $ oc expose service quarkus-started
 route.route.openshift.io/quarkus-started exposed
 ```
 
+Y ya lo tenemos disponible, para crear el un servicio Serverless lo vamos a ver por la UI.
+
+
+## Construccion de una Pipeline de Tekton
+
+
+Al usar el CDR de K8s, el mismo es un archivo yaml asi que importamos una Task para ver su funcionamiento.
 
 ```
 $ oc apply -f task-helloworld.yaml
 error: unable to recognize "task-helloworld.yaml": no matches for kind "Task" in version "tekton.dev/v1alpha1"
 ```
 
+Kustamos las tareas que figuran en el sistema.
 ```
 $ tkn task ls
 NAME               DESCRIPTION   AGE
 echo-hello-world                 6 minutes ago
 ```
 
+Podemos ejecutar por linea de comando
 ```
 $ tkn task start echo-hello-world                              
 Taskrun started: echo-hello-world-run-mqrxk                    
@@ -288,40 +300,25 @@ In order to track the taskrun progress run:
 tkn taskrun logs echo-hello-world-run-mqrxk -f -n quarkus-started                                                             
 ```       
 
+Y en caso de necesitar verificar el logs procedemos de la siguiente manera:
 ```
 $ tkn task logs echo-hello-world
 [echo] hello world
 ```
 
-```
-oc delete taskrun echo-hello-world-task-run
-oc delete task echo-hello-world
-```
-
-tkn pipeline ls
-tkn resource ls
-
-
-tkn pipeline start build-and-deploy \
-    -r git-repo=api-repo \
-    -r image=api-image \
-    -p deployment-name=vote-api
-
-tkn pipelinerun list
-
  
+
+Supongamos que queeremos invocar un Pipeline desde linea de comadno hacemos lo siguiente
 
  tkn pipeline start tdc-build-deploy \
  --param="mavenMirrorUrl=http://nexus3-kogito-tools.apps.kogito.automation.rhmw.io/repository/maven-public/"  \
  --param="kubernetesResourceFile=/workspace/source/quarkus-pipeline/src/main/kubernetes/Deployment.yml" \
- --resource="appSource=bgc-git-source" \
- --resource="appImage=bgc-image-blue" 
+ --resource="appSource=git-source" \
+ --resource="appImage=bgc-image-blue" \
+ //--serviceaccount="pipeline"
+ 
 
-
- --serviceaccount="pipeline"
-
-
-
+ 
 ## Links de interes
 
 -   http://www.mastertheboss.com/soa-cloud/quarkus/building-container-ready-native-applications-with-quarkus
