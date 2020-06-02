@@ -43,10 +43,11 @@ metadata:
   name: dummy-task
 spec:
   steps:
-    - name: mvn
-      image: 'maven:3.6.3-openjdk-15'
-      workingDir: /workspace/source
-      command: ["/usr/bin/mvn --version"]
+  - name: show-version
+    image: golang:1.14-alpine
+    workingDir: /workspace
+    command: ["go"]
+    args: ["help"]
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task

@@ -10,7 +10,6 @@ A continuacion les dejo algunos comentarios de la demo
 Openshift que usamos https://console-openshift-console.apps.cluster-9913-2178.9913-2178.sandbox1482.opentlc.com/
 
 
-
 ## Quarkus
 
 1) El proyecto que se utiliza __quarkus-started__ se genero por linea de consola de la siguiente manera:
@@ -89,8 +88,6 @@ $ mvn clean package -DskipTests
 
 
 Creamos en modo native
-
-
 ```
 $ mvn clean package -DskipTests -Pnative
 [INFO] Scanning for projects...
@@ -241,7 +238,6 @@ Push successful
 ```
 
 Una vez que la imagen se encuentra en el repositorio local, procedemos a crear una nueva app.
-
 ```
 $ oc new-app --image-stream=quarkus-started:latest
 --> Found image 871c5b0 (About a minute old) in image stream "quarkus-started/quarkus-started" under tag "latest" for "quarkus-started:latest"
@@ -307,7 +303,6 @@ $ tkn task logs echo-hello-world
 ```
 
  
-
 Supongamos que queeremos invocar un Pipeline desde linea de comadno hacemos lo siguiente
 
  tkn pipeline start tdc-build-deploy \

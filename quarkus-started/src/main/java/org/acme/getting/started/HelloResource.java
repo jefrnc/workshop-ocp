@@ -5,6 +5,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 @Path("/hello")
 public class HelloResource {
 
@@ -13,4 +15,12 @@ public class HelloResource {
     public String hello() {
         return "hello";
     }
+
+    /*
+    @ConfigProperty(name = "greeting.message") 
+    String message;
+
+    @ConfigProperty(name = "greeting.name", defaultValue="!") 
+    String name;*/
+
 }
