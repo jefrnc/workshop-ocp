@@ -7,7 +7,7 @@ Este repositorio fue armado para el workshop previsto para el 04/06/2020 sobre l
 A continuacion les dejo algunos comentarios de la demo
 
 ## Ambientes
-Openshift que usamos https://console-openshift-console.apps.cluster-9913-2178.9913-2178.sandbox1482.opentlc.com/
+Openshift que usamos https://console-openshift-console.apps.cluster-666-3005.666-3005.example.opentlc.com/dashboards
 
 
 ## Quarkus
@@ -67,7 +67,7 @@ __  ____  __  _____   ___  __ ____  ______
 2020-06-01 14:58:38,067 INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [cdi, resteasy]
 ```
 
-Usamos el htop para ver los threads y el consumo de memoria en el equipo.
+IMPORTANTE: Usamos el htop para ver los threads y el consumo de memoria en el equipo.
 
 
 Generamos un jar

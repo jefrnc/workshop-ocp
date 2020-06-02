@@ -1,0 +1,15 @@
+---
+    apiVersion: tekton.dev/v1alpha1
+    kind: PipelineRun
+    metadata:
+      name: php-pipeline-run
+    spec:
+      pipelineRef:
+        name: josesito
+      resources:
+        - name: adminui-git
+          resourceRef:
+            name: patientui-git
+        - name: adminui-image
+          resourceRef:
+            name: adminui-image
