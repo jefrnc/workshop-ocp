@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: patientui-git
+spec:
+  type: git
+  params:
+  - name: url
+    value: https://github.com/Coveros/helloworld.git
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: adminui-image
+spec:
+  type: image
+  params:
+  - name: url
+    #value: default-route-openshift-image-registry.apps.cluster-666-3005.666-3005.example.opentlc.com/tekton-pipelines/app-php
+    #value: default-route-openshift-image-registry.apps.cluster-666-3005.666-3005.example.opentlc.com:5000/tekton-pipelines/app-php
+    #value: image-registry.openshift-image-registry.svc:5000/quarkus-started/app-php
+    value: image-registry.openshift-image-registry.svc:5000/tekton-bootcamp/application-image
+    #value: http://172.30.211.34:5000/tekton/app-php
+    #api.cluster-666-3005.666-3005.example.opentlc.com
+    #curl -H "Authorization: Bearer 36Upn-3e1D8btUm0sRtlWeh9Z9qiTxjBfQqkFji2KV8" "https://api.cluster-666-3005.666-3005.example.opentlc.com:6443/apis/user.openshift.io/v1/users/~"
+    #image-registry.openshift-image-registry.svc:5000/tekton-pipelines/app-php

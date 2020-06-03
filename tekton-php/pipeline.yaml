@@ -9,21 +9,47 @@ spec:
   - name: adminui-image
     type: image
   tasks:
-  - name: build-adminui
+  - name: build
     taskRef:
-      name: s2i-php
-    params:
-      - name: TLSVERIFY
-        value: "false"
-      - name: PATH_CONTEXT
-        value: "./"
+      name: s2i-java-8
+      kind: ClusterTask
     resources:
       inputs:
-      - name: source
-        resource: adminui-git
+        - name: source
+          resource: adminui-git
       outputs:
-      - name: image
-        resource: adminui-image
+        - name: image
+          resource: adminui-image
+    params:
+      - name: PATH_CONTEXT
+        value: .
+      - name: TLSVERIFY
+        value: "false"
+      - name: MAVEN_ARGS_APPEND
+        value: ""
+      - name: MAVEN_CLEAR_REPO
+        value: "false"
+      - name: MAVEN_MIRROR_URL
+        value: ""
+
+
+  # - name: build-adminui
+  #   taskRef:
+  #     name: s2i-java-8
+  #   # params:
+  #   #   - name: TLSVERIFY
+  #   #     value: "false"
+  #   #   - name: PATH_CONTEXT
+  #   #     value: "./"
+  #   resources:
+  #     inputs:
+  #     - name: source
+  #       resource: adminui-git
+  #     outputs:
+  #     - name: image
+  #       resource: adminui-image
+
+
   # - name: build-analytics-dataservice
   #   taskRef:
   #     name: s2i-nodejs

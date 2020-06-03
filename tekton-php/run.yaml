@@ -1,15 +1,22 @@
 ---
-    apiVersion: tekton.dev/v1alpha1
-    kind: PipelineRun
-    metadata:
-      name: php-pipeline-run
-    spec:
-      pipelineRef:
-        name: josesito
-      resources:
-        - name: adminui-git
-          resourceRef:
-            name: patientui-git
-        - name: adminui-image
-          resourceRef:
-            name: adminui-image
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
+metadata:
+  name: php-pipeline-5
+  generateName: php-pipeline-run-pr-
+spec:
+  pipelineRef:
+    name: josesito
+  # params:
+  #   - name: TLSVERIFY
+  #     value: "false"
+  #   - name: PATH_CONTEXT
+  #     value: "./"
+  resources:
+    - name: adminui-git
+      resourceRef:
+        name: patientui-git
+    - name: adminui-image
+      resourceRef:
+        name: adminui-image
+  serviceAccountName: builder
